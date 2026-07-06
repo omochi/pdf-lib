@@ -650,13 +650,6 @@
   dependencies:
     pako "^1.0.6"
 
-"@pdf-lib/standard-fonts@^1.0.0":
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/@pdf-lib/standard-fonts/-/standard-fonts-1.0.0.tgz#8ba691c4421f71662ed07c9a0294b44528af2d7f"
-  integrity sha512-hU30BK9IUN/su0Mn9VdlVKsWBS6GyhVfqjwl1FjZN4TxP6cCw0jP2w7V3Hf5uX7M0AZJ16vey9yE0ny7Sa59ZA==
-  dependencies:
-    pako "^1.0.6"
-
 "@pdf-lib/upng@^1.0.1":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/@pdf-lib/upng/-/upng-1.0.1.tgz#7dc9c636271aca007a9df4deaf2dd7e7960280cb"

@@ -4,11 +4,10 @@ import {
   CustomFontEmbedder,
   PDFHexString,
   PDFRef,
-  StandardFontEmbedder,
 } from 'src/core';
 import { assertIs, assertOrUndefined } from 'src/utils';
 
-export type FontEmbedder = CustomFontEmbedder | StandardFontEmbedder;
+export type FontEmbedder = CustomFontEmbedder;
 
 /**
  * Represents a font that has been embedded in a [[PDFDocument]].
@@ -16,9 +15,8 @@ export type FontEmbedder = CustomFontEmbedder | StandardFontEmbedder;
 export default class PDFFont implements Embeddable {
   /**
    * > **NOTE:** You probably don't want to call this method directly. Instead,
-   * > consider using the [[PDFDocument.embedFont]] and
-   * > [[PDFDocument.embedStandardFont]] methods, which will create instances
-   * > of [[PDFFont]] for you.
+   * > consider using the [[PDFDocument.embedFont]] method, which will create
+   * > instances of [[PDFFont]] for you.
    *
    * Create an instance of [[PDFFont]] from an existing ref and embedder
    *
@@ -46,7 +44,6 @@ export default class PDFFont implements Embeddable {
     assertIs(doc, 'doc', [[PDFDocument, 'PDFDocument']]);
     assertIs(embedder, 'embedder', [
       [CustomFontEmbedder, 'CustomFontEmbedder'],
-      [StandardFontEmbedder, 'StandardFontEmbedder'],
     ]);
 
     this.ref = ref;
@@ -128,11 +125,7 @@ export default class PDFFont implements Embeddable {
    * @returns The set of unicode code points supported by this font.
    */
   getCharacterSet(): number[] {
-    if (this.embedder instanceof StandardFontEmbedder) {
-      return this.embedder.encoding.supportedCodePoints;
-    } else {
-      return this.embedder.font.characterSet;
-    }
+    return this.embedder.font.characterSet;
   }
 
   /**

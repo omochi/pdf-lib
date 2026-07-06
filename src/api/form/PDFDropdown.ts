@@ -191,15 +191,9 @@ export default class PDFDropdown extends PDFField {
    * [[PDFForm.updateFieldAppearances]] is called. The updated streams will
    * display the selected option inside the widgets of this dropdown.
    *
-   * **IMPORTANT:** The default font used to update appearance streams is
-   * [[StandardFonts.Helvetica]]. Note that this is a WinAnsi font. This means
-   * that encoding errors will be thrown if the selected option for this field
-   * contains characters outside the WinAnsi character set (the latin alphabet).
-   *
-   * Embedding a custom font and passing it to
+   * **IMPORTANT:** A font must be passed to
    * [[PDFForm.updateFieldAppearances]] or [[PDFDropdown.updateAppearances]]
-   * allows you to generate appearance streams with characters outside the
-   * latin alphabet (assuming the custom font supports them).
+   * before appearance streams can be regenerated.
    *
    * Selecting an option that does not exist in this dropdown's option list
    * (see [[PDFDropdown.getOptions]]) will enable editing on this dropdown
@@ -591,9 +585,9 @@ export default class PDFDropdown extends PDFField {
    * Update the appearance streams for each of this dropdown's widgets using
    * the default appearance provider for dropdowns. For example:
    * ```js
-   * const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const dropdown = form.getDropdown('some.dropdown.field')
-   * dropdown.defaultUpdateAppearances(helvetica)
+   * dropdown.defaultUpdateAppearances(font)
    * ```
    * @param font The font to be used for creating the appearance streams.
    */
@@ -607,9 +601,9 @@ export default class PDFDropdown extends PDFField {
    * the given appearance provider. If no `provider` is passed, the default
    * appearance provider for dropdowns will be used. For example:
    * ```js
-   * const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const dropdown = form.getDropdown('some.dropdown.field')
-   * dropdown.updateAppearances(helvetica, (field, widget, font) => {
+   * dropdown.updateAppearances(font, (field, widget, font) => {
    *   ...
    *   return drawTextField(...)
    * })

@@ -32,7 +32,6 @@ import {
   BlendMode,
 } from 'src/api/PDFPageOptions';
 import { degrees, Rotation, toDegrees } from 'src/api/rotations';
-import { StandardFonts } from 'src/api/StandardFonts';
 import {
   PDFContentStream,
   PDFHexString,
@@ -679,19 +678,16 @@ export default class PDFPage {
    * Choose a default font for this page. The default font will be used whenever
    * text is drawn on this page and no font is specified. For example:
    * ```js
-   * import { StandardFonts } from 'pdf-lib'
-   *
-   * const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-   * const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
-   * const courierFont = await pdfDoc.embedFont(StandardFonts.Courier)
+   * const titleFont = await pdfDoc.embedFont(titleFontBytes)
+   * const bodyFont = await pdfDoc.embedFont(bodyFontBytes)
    *
    * const page = pdfDoc.addPage()
    *
-   * page.setFont(helveticaFont)
-   * page.drawText('I will be drawn in Helvetica')
+   * page.setFont(bodyFont)
+   * page.drawText('I will be drawn with the body font')
    *
-   * page.setFont(timesRomanFont)
-   * page.drawText('I will be drawn in Courier', { font: courierFont })
+   * page.setFont(titleFont)
+   * page.drawText('I will be drawn with the body font', { font: bodyFont })
    * ```
    * @param font The default font to be used when drawing text on this page.
    */
@@ -928,14 +924,14 @@ export default class PDFPage {
   /**
    * Draw one or more lines of text on this page. For example:
    * ```js
-   * import { StandardFonts, rgb } from 'pdf-lib'
+   * import { rgb } from 'pdf-lib'
    *
-   * const helveticaFont = await pdfDoc.embedFont(StandardFonts.Helvetica)
-   * const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+   * const titleFont = await pdfDoc.embedFont(titleFontBytes)
+   * const bodyFont = await pdfDoc.embedFont(bodyFontBytes)
    *
    * const page = pdfDoc.addPage()
    *
-   * page.setFont(helveticaFont)
+   * page.setFont(titleFont)
    *
    * page.moveTo(5, 200)
    * page.drawText('The Life of an Egg', { size: 36 })
@@ -1551,8 +1547,7 @@ export default class PDFPage {
 
   private getFont(): [PDFFont, PDFName] {
     if (!this.font || !this.fontKey) {
-      const font = this.doc.embedStandardFont(StandardFonts.Helvetica);
-      this.setFont(font);
+      throw new Error('A font must be set before drawing text');
     }
     return [this.font!, this.fontKey!];
   }

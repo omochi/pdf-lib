@@ -136,15 +136,9 @@ export default class PDFOptionList extends PDFField {
    * display the options this field contains inside the widgets of this text
    * field (with selected options highlighted).
    *
-   * **IMPORTANT:** The default font used to update appearance streams is
-   * [[StandardFonts.Helvetica]]. Note that this is a WinAnsi font. This means
-   * that encoding errors will be thrown if this field contains any options
-   * with characters outside the WinAnsi character set (the latin alphabet).
-   *
-   * Embedding a custom font and passing it to
+   * **IMPORTANT:** A font must be passed to
    * [[PDFForm.updateFieldAppearances]] or [[PDFOptionList.updateAppearances]]
-   * allows you to generate appearance streams with characters outside the
-   * latin alphabet (assuming the custom font supports them).
+   * before appearance streams can be regenerated.
    *
    * @param options The options that should be available in this option list.
    */
@@ -510,9 +504,9 @@ export default class PDFOptionList extends PDFField {
    * Update the appearance streams for each of this option list's widgets using
    * the default appearance provider for option lists. For example:
    * ```js
-   * const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const optionList = form.getOptionList('some.optionList.field')
-   * optionList.defaultUpdateAppearances(helvetica)
+   * optionList.defaultUpdateAppearances(font)
    * ```
    * @param font The font to be used for creating the appearance streams.
    */
@@ -526,9 +520,9 @@ export default class PDFOptionList extends PDFField {
    * the given appearance provider. If no `provider` is passed, the default
    * appearance provider for option lists will be used. For example:
    * ```js
-   * const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const optionList = form.getOptionList('some.optionList.field')
-   * optionList.updateAppearances(helvetica, (field, widget, font) => {
+   * optionList.updateAppearances(font, (field, widget, font) => {
    *   ...
    *   return drawOptionList(...)
    * })

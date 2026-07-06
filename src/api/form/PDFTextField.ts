@@ -128,15 +128,9 @@ export default class PDFTextField extends PDFField {
    * display the text this field contains inside the widgets of this text
    * field.
    *
-   * **IMPORTANT:** The default font used to update appearance streams is
-   * [[StandardFonts.Helvetica]]. Note that this is a WinAnsi font. This means
-   * that encoding errors will be thrown if this field contains text outside
-   * the WinAnsi character set (the latin alphabet).
-   *
-   * Embedding a custom font and passing it to
+   * **IMPORTANT:** A font must be passed to
    * [[PDFForm.updateFieldAppearances]] or [[PDFTextField.updateAppearances]]
-   * allows you to generate appearance streams with characters outside the
-   * latin alphabet (assuming the custom font supports them).
+   * before appearance streams can be regenerated.
    *
    * If this is a rich text field, it will be converted to a standard text
    * field in order to set the text. `pdf-lib` does not support writing rich
@@ -772,9 +766,9 @@ export default class PDFTextField extends PDFField {
    * Update the appearance streams for each of this text field's widgets using
    * the default appearance provider for text fields. For example:
    * ```js
-   * const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const textField = form.getTextField('some.text.field')
-   * textField.defaultUpdateAppearances(helvetica)
+   * textField.defaultUpdateAppearances(font)
    * ```
    * @param font The font to be used for creating the appearance streams.
    */
@@ -788,9 +782,9 @@ export default class PDFTextField extends PDFField {
    * the given appearance provider. If no `provider` is passed, the default
    * appearance provider for text fields will be used. For example:
    * ```js
-   * const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const textField = form.getTextField('some.text.field')
-   * textField.updateAppearances(helvetica, (field, widget, font) => {
+   * textField.updateAppearances(font, (field, widget, font) => {
    *   ...
    *   return drawTextField(...)
    * })
