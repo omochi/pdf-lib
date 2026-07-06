@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "ES2016",
-    "lib": ["ES2016"],
+    "target": "ES2019",
+    "lib": ["ES2019"],
     "types": ["node"],
     "module": "commonjs",
     "allowJs": false,
@@ -16,7 +16,7 @@
     "incremental": true,
     "tsBuildInfoFile": "./tsBuildInfo.json",
     "removeComments": false,
-    "importHelpers": true,
+    "importHelpers": false,
     "isolatedModules": false,
     "newLine": "LF",
 
