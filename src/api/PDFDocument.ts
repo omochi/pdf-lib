@@ -11,7 +11,6 @@ import PDFImage from 'src/api/PDFImage';
 import PDFPage from 'src/api/PDFPage';
 import PDFForm from 'src/api/form/PDFForm';
 import { PageSizes } from 'src/api/sizes';
-import { StandardFonts } from 'src/api/StandardFonts';
 import {
   CustomFontEmbedder,
   CustomFontSubsetEmbedder,
@@ -32,7 +31,6 @@ import {
   PDFString,
   PDFWriter,
   PngEmbedder,
-  StandardFontEmbedder,
   UnexpectedObjectTypeError,
 } from 'src/core';
 import {
@@ -57,7 +55,6 @@ import {
   Cache,
   canBeConvertedToUint8Array,
   encodeToBase64,
-  isStandardFont,
   pluckIndices,
   range,
   toUint8Array,
@@ -906,17 +903,12 @@ export default class PDFDocument {
    *
    * | Type            | Contents                                                |
    * | --------------- | ------------------------------------------------------- |
-   * | `StandardFonts` | One of the standard 14 fonts                            |
    * | `string`        | A base64 encoded string (or data URI) containing a font |
    * | `Uint8Array`    | The raw bytes of a font                                 |
    * | `ArrayBuffer`   | The raw bytes of a font                                 |
    *
    * For example:
    * ```js
-   * // font=StandardFonts
-   * import { StandardFonts } from 'pdf-lib'
-   * const font1 = await pdfDoc.embedFont(StandardFonts.Helvetica)
-   *
    * // font=string
    * const font2 = await pdfDoc.embedFont('AAEAAAAVAQAABABQRFNJRx/upe...')
    * const font3 = await pdfDoc.embedFont('data:font/opentype;base64,AAEAAA...')
@@ -936,7 +928,7 @@ export default class PDFDocument {
    * @returns Resolves with the embedded font.
    */
   async embedFont(
-    font: StandardFonts | string | Uint8Array | ArrayBuffer,
+    font: string | Uint8Array | ArrayBuffer,
     options: EmbedFontOptions = {},
   ): Promise<PDFFont> {
     const { subset = false, customName, features } = options;
@@ -944,10 +936,8 @@ export default class PDFDocument {
     assertIs(font, 'font', ['string', Uint8Array, ArrayBuffer]);
     assertIs(subset, 'subset', ['boolean']);
 
-    let embedder: CustomFontEmbedder | StandardFontEmbedder;
-    if (isStandardFont(font)) {
-      embedder = StandardFontEmbedder.for(font, customName);
-    } else if (canBeConvertedToUint8Array(font)) {
+    let embedder: CustomFontEmbedder;
+    if (canBeConvertedToUint8Array(font)) {
       const bytes = toUint8Array(font);
       const fontkit = this.assertFontkit();
       embedder = subset
@@ -960,35 +950,9 @@ export default class PDFDocument {
         : await CustomFontEmbedder.for(fontkit, bytes, customName, features);
     } else {
       throw new TypeError(
-        '`font` must be one of `StandardFonts | string | Uint8Array | ArrayBuffer`',
+        '`font` must be one of `string | Uint8Array | ArrayBuffer`',
       );
     }
-
-    const ref = this.context.nextRef();
-    const pdfFont = PDFFont.of(ref, this, embedder);
-    this.fonts.push(pdfFont);
-
-    return pdfFont;
-  }
-
-  /**
-   * Embed a standard font into this document.
-   * For example:
-   * ```js
-   * import { StandardFonts } from 'pdf-lib'
-   * const helveticaFont = pdfDoc.embedFont(StandardFonts.Helvetica)
-   * ```
-   * @param font The standard font to be embedded.
-   * @param customName The name to be used when embedding the font.
-   * @returns The embedded font.
-   */
-  embedStandardFont(font: StandardFonts, customName?: string): PDFFont {
-    assertIs(font, 'font', ['string']);
-    if (!isStandardFont(font)) {
-      throw new TypeError('`font` must be one of type `StandardFonts`');
-    }
-
-    const embedder = StandardFontEmbedder.for(font, customName);
 
     const ref = this.context.nextRef();
     const pdfFont = PDFFont.of(ref, this, embedder);

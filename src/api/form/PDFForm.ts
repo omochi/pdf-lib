@@ -15,7 +15,6 @@ import {
   InvalidFieldNamePartError,
 } from 'src/api/errors';
 import PDFFont from 'src/api/PDFFont';
-import { StandardFonts } from 'src/api/StandardFonts';
 import { rotateInPlace } from 'src/api/operations';
 import {
   drawObject,
@@ -41,7 +40,7 @@ import {
   PDFName,
   PDFWidgetAnnotation,
 } from 'src/core';
-import { assertIs, Cache, assertOrUndefined } from 'src/utils';
+import { assertIs, assertOrUndefined } from 'src/utils';
 
 export interface FlattenOptions {
   updateFieldAppearances: boolean;
@@ -79,7 +78,6 @@ export default class PDFForm {
   readonly doc: PDFDocument;
 
   private readonly dirtyFields: Set<PDFRef>;
-  private readonly defaultFontCache: Cache<PDFFont>;
 
   private constructor(acroForm: PDFAcroForm, doc: PDFDocument) {
     assertIs(acroForm, 'acroForm', [[PDFAcroForm, 'PDFAcroForm']]);
@@ -89,7 +87,6 @@ export default class PDFForm {
     this.doc = doc;
 
     this.dirtyFields = new Set();
-    this.defaultFontCache = Cache.populatedBy(this.embedDefaultFont);
   }
 
   /**
@@ -332,7 +329,7 @@ export default class PDFForm {
    * Create a new button field in this [[PDFForm]] with the given name.
    * For example:
    * ```js
-   * const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const page = pdfDoc.addPage()
    *
    * const form = pdfDoc.getForm()
@@ -362,7 +359,7 @@ export default class PDFForm {
    * Create a new check box field in this [[PDFForm]] with the given name.
    * For example:
    * ```js
-   * const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const page = pdfDoc.addPage()
    *
    * const form = pdfDoc.getForm()
@@ -392,7 +389,7 @@ export default class PDFForm {
    * Create a new dropdown field in this [[PDFForm]] with the given name.
    * For example:
    * ```js
-   * const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const page = pdfDoc.addPage()
    *
    * const form = pdfDoc.getForm()
@@ -422,7 +419,7 @@ export default class PDFForm {
    * Create a new option list field in this [[PDFForm]] with the given name.
    * For example:
    * ```js
-   * const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const page = pdfDoc.addPage()
    *
    * const form = pdfDoc.getForm()
@@ -452,7 +449,7 @@ export default class PDFForm {
    * Create a new radio group field in this [[PDFForm]] with the given name.
    * For example:
    * ```js
-   * const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const page = pdfDoc.addPage()
    *
    * const form = pdfDoc.getForm()
@@ -487,7 +484,7 @@ export default class PDFForm {
    * Create a new text field in this [[PDFForm]] with the given name.
    * For example:
    * ```js
-   * const font = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const page = pdfDoc.addPage()
    *
    * const form = pdfDoc.getForm()
@@ -614,19 +611,13 @@ export default class PDFForm {
    *
    * For example:
    * ```js
-   * const courier = await pdfDoc.embedFont(StandardFonts.Courier)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const form = pdfDoc.getForm()
-   * form.updateFieldAppearances(courier)
+   * form.updateFieldAppearances(font)
    * ```
    *
-   * **IMPORTANT:** The default value for the `font` parameter is
-   * [[StandardFonts.Helvetica]]. Note that this is a WinAnsi font. This means
-   * that encoding errors will be thrown if any fields contain text with
-   * characters outside the WinAnsi character set (the latin alphabet).
-   *
-   * Embedding a custom font and passing that as the `font`
-   * parameter allows you to generate appearance streams with non WinAnsi
-   * characters (assuming your custom font supports them).
+   * **IMPORTANT:** A font must be passed as the `font` parameter before
+   * appearance streams can be regenerated.
    *
    * > **NOTE:** The [[PDFDocument.save]] method will call this method to
    * > update appearances automatically if a form was accessed via the
@@ -637,7 +628,9 @@ export default class PDFForm {
   updateFieldAppearances(font?: PDFFont) {
     assertOrUndefined(font, 'font', [[PDFFont, 'PDFFont']]);
 
-    font = font ?? this.getDefaultFont();
+    if (!font) {
+      throw new Error('A font must be provided to update field appearances');
+    }
 
     const fields = this.getFields();
 
@@ -694,8 +687,8 @@ export default class PDFForm {
     return this.dirtyFields.has(fieldRef);
   }
 
-  getDefaultFont() {
-    return this.defaultFontCache.access();
+  getDefaultFont(): PDFFont {
+    throw new Error('No default font is available');
   }
 
   private findWidgetPage(widget: PDFWidgetAnnotation): PDFPage {
@@ -787,8 +780,6 @@ export default class PDFForm {
     return undefined;
   }
 
-  private embedDefaultFont = (): PDFFont =>
-    this.doc.embedStandardFont(StandardFonts.Helvetica);
 }
 
 const convertToPDFField = (

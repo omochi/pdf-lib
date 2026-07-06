@@ -211,9 +211,9 @@ export default class PDFButton extends PDFField {
    * Update the appearance streams for each of this button's widgets using
    * the default appearance provider for buttons. For example:
    * ```js
-   * const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const button = form.getButton('some.button.field')
-   * button.defaultUpdateAppearances(helvetica)
+   * button.defaultUpdateAppearances(font)
    * ```
    * @param font The font to be used for creating the appearance streams.
    */
@@ -227,9 +227,9 @@ export default class PDFButton extends PDFField {
    * the given appearance provider. If no `provider` is passed, the default
    * appearance provider for buttons will be used. For example:
    * ```js
-   * const helvetica = await pdfDoc.embedFont(StandardFonts.Helvetica)
+   * const font = await pdfDoc.embedFont(fontBytes)
    * const button = form.getButton('some.button.field')
-   * button.updateAppearances(helvetica, (field, widget, font) => {
+   * button.updateAppearances(font, (field, widget, font) => {
    *   ...
    *   return {
    *     normal: drawButton(...),

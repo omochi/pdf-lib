@@ -11,7 +11,6 @@ export { default as PDFTrailer } from 'src/core/document/PDFTrailer';
 export { default as PDFTrailerDict } from 'src/core/document/PDFTrailerDict';
 export { default as PDFCrossRefSection } from 'src/core/document/PDFCrossRefSection';
 
-export { default as StandardFontEmbedder } from 'src/core/embedders/StandardFontEmbedder';
 export { default as CustomFontEmbedder } from 'src/core/embedders/CustomFontEmbedder';
 export { default as CustomFontSubsetEmbedder } from 'src/core/embedders/CustomFontSubsetEmbedder';
 export {
