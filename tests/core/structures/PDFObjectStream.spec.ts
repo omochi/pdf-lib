@@ -1,4 +1,4 @@
-import pako from 'pako';
+import { deflateSync } from 'node:zlib';
 
 import {
   mergeIntoTypedArray,
@@ -115,7 +115,7 @@ describe(`PDFObjectStream`, () => {
       'null\n' +
       '21\n' +
       '(Stuff and thingz)\n';
-    const encodedContents = pako.deflate(contents);
+    const encodedContents = deflateSync(contents);
 
     const stream = PDFObjectStream.withContextAndObjects(
       context,

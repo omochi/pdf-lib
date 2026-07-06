@@ -1,18 +1,21 @@
 import fontkit from '@pdf-lib/fontkit';
-import { FontNames } from '@pdf-lib/standard-fonts';
 import fs from 'fs';
 
-import { CustomFontEmbedder, StandardFontEmbedder } from 'src/core';
+import { CustomFontEmbedder } from 'src/core';
 import { breakTextIntoLines } from 'src/utils';
-
-const font = StandardFontEmbedder.for(FontNames.Helvetica);
 
 const textSize = 24;
 
-const computeTextWidth = (text: string) =>
-  font.widthOfTextAtSize(text, textSize);
+let computeTextWidth: (text: string) => number;
 
 describe(`breakTextIntoLines`, () => {
+  beforeAll(async () => {
+    const fontBytes = fs.readFileSync('assets/fonts/ubuntu/Ubuntu-R.ttf');
+    const font = await CustomFontEmbedder.for(fontkit, fontBytes);
+    computeTextWidth = (text: string) =>
+      font.widthOfTextAtSize(text, textSize);
+  });
+
   it(`handles empty wordBreaks arrays`, () => {
     const input = 'foobar-quxbaz';
     const expected = ['foobar-quxbaz'];
@@ -47,11 +50,11 @@ describe(`breakTextIntoLines`, () => {
     const expected = [
       'Lorem T',
       'est ipsu',
-      'm dolor s',
-      'it amet, c',
-      'onsectet',
-      'ur adipis',
-      'cing',
+      'm dolor ',
+      'sit amet, ',
+      'consecte',
+      'tur adipi',
+      'scing',
       'elit',
     ];
     const actual = breakTextIntoLines(

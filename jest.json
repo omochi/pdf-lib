@@ -1,9 +1,11 @@
 {
-  "preset": "ts-jest",
   "testEnvironment": "node",
   "coverageReporters": ["html"],
   "testMatch": ["<rootDir>/tests/**/*.spec.ts"],
   "roots": ["src", "tests"],
+  "transform": {
+    "^.+\\.tsx?$": ["ts-jest", { "tsconfig": "tests/tsconfig.json" }]
+  },
   "moduleNameMapper": {
     "^src/(.*)$": "<rootDir>/src/$1"
   }

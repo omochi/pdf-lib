@@ -1,14 +1,23 @@
-import { PDFDocument, StandardFonts, TextAlignment } from 'src/index';
+import fontkit from '@pdf-lib/fontkit';
+import fs from 'fs';
+
+import { PDFDocument, PDFFont, TextAlignment } from 'src/index';
 
 import { layoutMultilineText } from 'src/api/text/layout';
 
 const MIN_FONT_SIZE = 4;
 const MAX_FONT_SIZE = 500;
+const fontBytes = fs.readFileSync('assets/fonts/ubuntu/Ubuntu-R.ttf');
+
+const embedTestFont = async (): Promise<PDFFont> => {
+  const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
+  return pdfDoc.embedFont(fontBytes);
+};
 
 describe(`layoutMultilineText`, () => {
   it('should layout the text on one line when it fits near-perfectly', async () => {
-    const pdfDoc = await PDFDocument.create();
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const font = await embedTestFont();
     const alignment = TextAlignment.Left;
     const padding = 0;
     const borderWidth = 0;
@@ -38,8 +47,7 @@ describe(`layoutMultilineText`, () => {
   });
 
   it('should layout the text on one line when it fits comfortably', async () => {
-    const pdfDoc = await PDFDocument.create();
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const font = await embedTestFont();
     const alignment = TextAlignment.Left;
     const padding = 0;
     const borderWidth = 0;
@@ -69,8 +77,7 @@ describe(`layoutMultilineText`, () => {
   });
 
   it('should layout the text on multiple lines when it does not fit horizontally but there is space vertically', async () => {
-    const pdfDoc = await PDFDocument.create();
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const font = await embedTestFont();
     const alignment = TextAlignment.Left;
     const padding = 0;
     const borderWidth = 0;
@@ -104,8 +111,7 @@ describe(`layoutMultilineText`, () => {
   });
 
   it('should never exceed the maximum font size', async () => {
-    const pdfDoc = await PDFDocument.create();
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const font = await embedTestFont();
     const alignment = TextAlignment.Left;
     const padding = 0;
     const borderWidth = 0;
@@ -132,8 +138,7 @@ describe(`layoutMultilineText`, () => {
   });
 
   it('should respect empty lines', async () => {
-    const pdfDoc = await PDFDocument.create();
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const font = await embedTestFont();
     const alignment = TextAlignment.Left;
     const padding = 0;
     const borderWidth = 0;

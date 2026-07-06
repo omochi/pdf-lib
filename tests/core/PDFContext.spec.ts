@@ -1,4 +1,4 @@
-import pako from 'pako';
+import { deflateSync } from 'node:zlib';
 
 import {
   PDFArray,
@@ -90,7 +90,7 @@ describe(`PDFContext`, () => {
         '/Length 25\n',
         '>>\n',
         'stream\n',
-        pako.deflate('stuff and things!'),
+        deflateSync('stuff and things!'),
         '\nendstream',
       ),
     );
