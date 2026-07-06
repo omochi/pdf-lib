@@ -14,7 +14,6 @@ export interface SaveOptions {
   useObjectStreams?: boolean;
   addDefaultPage?: boolean;
   objectsPerTick?: number;
-  updateFieldAppearances?: boolean;
 }
 
 export interface Base64SaveOptions extends SaveOptions {

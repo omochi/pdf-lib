@@ -9,7 +9,6 @@ import PDFEmbeddedPage from 'src/api/PDFEmbeddedPage';
 import PDFFont from 'src/api/PDFFont';
 import PDFImage from 'src/api/PDFImage';
 import PDFPage from 'src/api/PDFPage';
-import PDFForm from 'src/api/form/PDFForm';
 import { PageSizes } from 'src/api/sizes';
 import {
   CustomFontEmbedder,
@@ -179,7 +178,6 @@ export default class PDFDocument {
   private pageCount: number | undefined;
   private readonly pageCache: Cache<PDFPage[]>;
   private readonly pageMap: Map<PDFPageLeaf, PDFPage>;
-  private readonly formCache: Cache<PDFForm>;
   private readonly fonts: PDFFont[];
   private readonly images: PDFImage[];
   private readonly embeddedPages: PDFEmbeddedPage[];
@@ -200,7 +198,6 @@ export default class PDFDocument {
 
     this.pageCache = Cache.populatedBy(this.computePages);
     this.pageMap = new Map();
-    this.formCache = Cache.populatedBy(this.getOrCreateForm);
     this.fonts = [];
     this.images = [];
     this.embeddedPages = [];
@@ -232,31 +229,6 @@ export default class PDFDocument {
    */
   registerFontkit(fontkit: Fontkit): void {
     this.fontkit = fontkit;
-  }
-
-  /**
-   * Get the [[PDFForm]] containing all interactive fields for this document.
-   * For example:
-   * ```js
-   * const form = pdfDoc.getForm()
-   * const fields = form.getFields()
-   * fields.forEach(field => {
-   *   const type = field.constructor.name
-   *   const name = field.getName()
-   *   console.log(`${type}: ${name}`)
-   * })
-   * ```
-   * @returns The form for this document.
-   */
-  getForm(): PDFForm {
-    const form = this.formCache.access();
-    if (form.hasXFA()) {
-      console.warn(
-        'Removing XFA form data as pdf-lib does not support reading or writing XFA',
-      );
-      form.deleteXFA();
-    }
-    return form;
   }
 
   /**
@@ -1233,20 +1205,13 @@ export default class PDFDocument {
       useObjectStreams = true,
       addDefaultPage = true,
       objectsPerTick = 50,
-      updateFieldAppearances = true,
     } = options;
 
     assertIs(useObjectStreams, 'useObjectStreams', ['boolean']);
     assertIs(addDefaultPage, 'addDefaultPage', ['boolean']);
     assertIs(objectsPerTick, 'objectsPerTick', ['number']);
-    assertIs(updateFieldAppearances, 'updateFieldAppearances', ['boolean']);
 
     if (addDefaultPage && this.getPageCount() === 0) this.addPage();
-
-    if (updateFieldAppearances) {
-      const form = this.formCache.getValue();
-      if (form) form.updateFieldAppearances();
-    }
 
     await this.flush();
 
@@ -1338,11 +1303,6 @@ export default class PDFDocument {
       }
     });
     return pages;
-  };
-
-  private getOrCreateForm = (): PDFForm => {
-    const acroForm = this.catalog.getOrCreateAcroForm();
-    return PDFForm.of(acroForm, this);
   };
 }
 
