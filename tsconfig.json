@@ -1,7 +1,9 @@
 {
   "compilerOptions": {
     /* Basic Options */
-    "target": "es5",
+    "target": "ES2016",
+    "lib": ["ES2016"],
+    "types": ["node"],
     "module": "commonjs",
     "allowJs": false,
     "checkJs": false,
@@ -15,12 +17,12 @@
     "tsBuildInfoFile": "./tsBuildInfo.json",
     "removeComments": false,
     "importHelpers": true,
-    "downlevelIteration": false,
     "isolatedModules": false,
     "newLine": "LF",
 
     /* Strict Type-Checking Options */
     "strict": true,
+    "skipLibCheck": true,
 
     /* Additional Checks */
     "noUnusedLocals": true,
@@ -29,17 +31,12 @@
     "noFallthroughCasesInSwitch": true,
 
     /* Module Resolution Options */
-    "baseUrl": "./src",
     "paths": {
-      "src/*": ["./*"]
+      "src/*": ["./src/*"]
     },
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "preserveSymlinks": true,
-    "moduleResolution": "node",
-
-    /* Plugins */
-    "plugins": [{ "transform": "@zerollup/ts-transform-paths" }]
+    "preserveSymlinks": true
   },
   "include": ["src/**/*"]
 }
