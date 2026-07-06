@@ -1,13 +1,4 @@
-import UPNG from '@pdf-lib/upng';
-
-const getImageType = (ctype: number) => {
-  if (ctype === 0) return PngType.Greyscale;
-  if (ctype === 2) return PngType.Truecolour;
-  if (ctype === 3) return PngType.IndexedColour;
-  if (ctype === 4) return PngType.GreyscaleWithAlpha;
-  if (ctype === 6) return PngType.TruecolourWithAlpha;
-  throw new Error(`Unknown color type: ${ctype}`);
-};
+import { PNG as PNGJS } from 'pngjs';
 
 const splitAlphaChannel = (rgbaChannel: Uint8Array) => {
   const pixelCount = Math.floor(rgbaChannel.length / 4);
@@ -29,31 +20,18 @@ const splitAlphaChannel = (rgbaChannel: Uint8Array) => {
   return { rgbChannel, alphaChannel };
 };
 
-export enum PngType {
-  Greyscale = 'Greyscale',
-  Truecolour = 'Truecolour',
-  IndexedColour = 'IndexedColour',
-  GreyscaleWithAlpha = 'GreyscaleWithAlpha',
-  TruecolourWithAlpha = 'TruecolourWithAlpha',
-}
-
 export class PNG {
   static load = (pngData: Uint8Array) => new PNG(pngData);
 
   readonly rgbChannel: Uint8Array;
   readonly alphaChannel?: Uint8Array;
-  readonly type: PngType;
   readonly width: number;
   readonly height: number;
   readonly bitsPerComponent: number;
 
   private constructor(pngData: Uint8Array) {
-    const upng = UPNG.decode(new Uint8Array(pngData).buffer);
-    const frames = UPNG.toRGBA8(upng);
-
-    if (frames.length > 1) throw new Error(`Animated PNGs are not supported`);
-
-    const frame = new Uint8Array(frames[0]);
+    const png = PNGJS.sync.read(Buffer.from(pngData));
+    const frame = new Uint8Array(png.data);
     const { rgbChannel, alphaChannel } = splitAlphaChannel(frame);
 
     this.rgbChannel = rgbChannel;
@@ -61,10 +39,8 @@ export class PNG {
     const hasAlphaValues = alphaChannel.some((a) => a < 255);
     if (hasAlphaValues) this.alphaChannel = alphaChannel;
 
-    this.type = getImageType(upng.ctype);
-
-    this.width = upng.width;
-    this.height = upng.height;
+    this.width = png.width;
+    this.height = png.height;
     this.bitsPerComponent = 8;
   }
 }
