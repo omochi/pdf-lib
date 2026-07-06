@@ -1,4 +1,4 @@
-import pako from 'pako';
+import { deflateSync } from 'node:zlib';
 
 import PDFHeader from 'src/core/document/PDFHeader';
 import { UnexpectedObjectTypeError } from 'src/core/errors';
@@ -231,7 +231,7 @@ class PDFContext {
     contents: string | Uint8Array,
     dict: LiteralObject = {},
   ): PDFRawStream {
-    return this.stream(pako.deflate(typedArrayFor(contents)), {
+    return this.stream(deflateSync(typedArrayFor(contents)), {
       ...dict,
       Filter: 'FlateDecode',
     });
