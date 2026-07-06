@@ -29,8 +29,8 @@ describe(`PDFImage`, () => {
       const ref = pdfDoc.context.nextRef();
       const pdfImage = PDFImage.of(ref, pdfDoc, embedder);
 
-      await expect(pdfImage.embed()).resolves.not.toThrowError();
-      await expect(pdfImage.embed()).resolves.not.toThrowError();
+      await expect(pdfImage.embed()).resolves.toBeUndefined();
+      await expect(pdfImage.embed()).resolves.toBeUndefined();
     });
 
     it(`may be called in parallel without causing an error`, async () => {
