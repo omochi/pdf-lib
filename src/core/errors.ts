@@ -110,34 +110,6 @@ export class IndexOutOfBoundsError extends Error {
   }
 }
 
-export class InvalidAcroFieldValueError extends Error {
-  constructor() {
-    const msg = `Attempted to set invalid field value`;
-    super(msg);
-  }
-}
-
-export class MultiSelectValueError extends Error {
-  constructor() {
-    const msg = `Attempted to select multiple values for single-select field`;
-    super(msg);
-  }
-}
-
-export class MissingDAEntryError extends Error {
-  constructor(fieldName: string) {
-    const msg = `No /DA (default appearance) entry found for field: ${fieldName}`;
-    super(msg);
-  }
-}
-
-export class MissingTfOperatorError extends Error {
-  constructor(fieldName: string) {
-    const msg = `No Tf operator found for DA of field: ${fieldName}`;
-    super(msg);
-  }
-}
-
 /***** Parser Errors ******/
 
 export interface Position {
