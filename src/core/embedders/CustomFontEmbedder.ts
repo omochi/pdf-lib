@@ -1,4 +1,10 @@
-import { Font, Fontkit, Glyph, TypeFeatures } from 'src/types/fontkit';
+import {
+  Font,
+  Fontkit,
+  Glyph,
+  GlyphRun,
+  TypeFeatures,
+} from 'src/types/fontkit';
 
 import { createCmap } from 'src/core/embedders/CMap';
 import { deriveFontFlags } from 'src/core/embedders/FontFlags';
@@ -38,6 +44,7 @@ class CustomFontEmbedder {
 
   protected baseFontName: string;
   protected glyphCache: Cache<Glyph[]>;
+  private readonly glyphRunsByText: Map<string, GlyphRun>;
 
   protected constructor(
     font: Font,
@@ -54,6 +61,7 @@ class CustomFontEmbedder {
 
     this.baseFontName = '';
     this.glyphCache = Cache.populatedBy(this.allGlyphsInFontSortedById);
+    this.glyphRunsByText = new Map();
   }
 
   /**
@@ -61,7 +69,7 @@ class CustomFontEmbedder {
    * Unicode, but embedded fonts use their own custom encodings)
    */
   encodeText(text: string): PDFHexString {
-    const { glyphs } = this.font.layout(text, this.fontFeatures);
+    const { glyphs } = this.layoutText(text);
     const hexCodes = new Array(glyphs.length);
     for (let idx = 0, len = glyphs.length; idx < len; idx++) {
       hexCodes[idx] = toHexStringOfMinLength(glyphs[idx].id, 4);
@@ -72,13 +80,22 @@ class CustomFontEmbedder {
   // The advanceWidth takes into account kerning automatically, so we don't
   // have to do that manually like we do for the standard fonts.
   widthOfTextAtSize(text: string, size: number): number {
-    const { glyphs } = this.font.layout(text, this.fontFeatures);
+    const { glyphs } = this.layoutText(text);
     let totalWidth = 0;
     for (let idx = 0, len = glyphs.length; idx < len; idx++) {
       totalWidth += glyphs[idx].advanceWidth * this.scale;
     }
     const scale = size / 1000;
     return totalWidth * scale;
+  }
+
+  protected layoutText(text: string): GlyphRun {
+    let glyphRun = this.glyphRunsByText.get(text);
+    if (glyphRun == null) {
+      glyphRun = this.font.layout(text, this.fontFeatures);
+      this.glyphRunsByText.set(text, glyphRun);
+    }
+    return glyphRun;
   }
 
   heightOfFontAtSize(

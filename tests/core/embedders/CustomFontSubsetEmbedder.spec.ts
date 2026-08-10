@@ -48,6 +48,23 @@ describe(`CustomFontSubsetEmbedder`, () => {
     expect(embedder.widthOfTextAtSize(text, 24)).toBe(181.344);
   });
 
+  it(`caches font layout by text`, async () => {
+    const text = 'Stuff and thingz!';
+    const embedder = await CustomFontSubsetEmbedder.for(fontkit, ubuntuFont);
+    const layout = jest.spyOn(embedder.font, 'layout');
+
+    embedder.widthOfTextAtSize(text, 12);
+    embedder.widthOfTextAtSize(text, 24);
+    embedder.encodeText(text);
+    embedder.encodeText(text);
+
+    expect(layout).toHaveBeenCalledTimes(1);
+
+    embedder.encodeText('Other text');
+
+    expect(layout).toHaveBeenCalledTimes(2);
+  });
+
   it(`can measure the height of the font at the given size`, async () => {
     const embedder = await CustomFontSubsetEmbedder.for(fontkit, ubuntuFont);
     expect(embedder.heightOfFontAtSize(12)).toBeCloseTo(13.452);
