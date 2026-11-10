@@ -1,6 +1,6 @@
 {
   "name": "pdf-lib",
-  "version": "1.17.1",
+  "version": "1.17.1-omochi.2",
   "description": "Create and modify PDF files with JavaScript",
   "author": "Andrew Dillon <andrew.dillon.j@gmail.com>",
   "contributors": [
@@ -82,7 +82,7 @@
     "pngjs": "^7.0.0"
   },
   "devDependencies": {
-    "@pdf-lib/fontkit": "https://github.com/omochi/fontkit/releases/download/v1.7.7-omochi.0/fontkit-v1.7.7-omochi.0.tgz",
+    "@pdf-lib/fontkit": "https://github.com/omochi/fontkit/releases/download/v1.7.7-omochi.2/fontkit-v1.7.7-omochi.2.tgz",
     "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",

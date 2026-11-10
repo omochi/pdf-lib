@@ -13,12 +13,13 @@ type BfChar = [string, string];
 
 /** `glyphs` should be an array of unique glyphs */
 export const createCmap = (glyphs: Glyph[], glyphId: (g?: Glyph) => number) => {
-  const bfChars: BfChar[] = new Array(glyphs.length);
+  const bfChars: BfChar[] = [];
   for (let idx = 0, len = glyphs.length; idx < len; idx++) {
     const glyph = glyphs[idx];
+    if (!glyph || glyph.codePoints.length === 0) continue;
     const id = cmapHexFormat(cmapHexString(glyphId(glyph)));
     const unicode = cmapHexFormat(...glyph.codePoints.map(cmapCodePointFormat));
-    bfChars[idx] = [id, unicode];
+    bfChars.push([id, unicode]);
   }
 
   return fillCmapTemplate(bfChars);

@@ -41,6 +41,26 @@ describe(`CustomFontSubsetEmbedder`, () => {
     );
   });
 
+  it(`encodes an existing glyph run without reshaping and rejects another font`, async () => {
+    const embedder = await CustomFontSubsetEmbedder.for(fontkit, ubuntuFont);
+    const glyphs = embedder.font
+      .layout('office')
+      .clusters.flatMap((cluster) => cluster.glyphs.map((item) => item.glyph));
+    const spy = jest.spyOn(embedder.font, 'layout');
+    expect(embedder.encodeGlyphs(glyphs)).toBeInstanceOf(PDFHexString);
+    expect(spy).not.toHaveBeenCalled();
+    const another = await CustomFontSubsetEmbedder.for(fontkit, ubuntuFont);
+    expect(() =>
+      embedder.encodeGlyphs(
+        another.font
+          .layout('x')
+          .clusters.flatMap((cluster) =>
+            cluster.glyphs.map((item) => item.glyph),
+          ),
+      ),
+    ).toThrow('different font instance');
+  });
+
   it(`can measure the width of text strings at the given font size`, async () => {
     const text = 'Stuff and thingz!';
     const embedder = await CustomFontSubsetEmbedder.for(fontkit, ubuntuFont);
