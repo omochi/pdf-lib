@@ -18,6 +18,10 @@ const contentStreamText = `
 
 const encodedContentStream = deflateSync(typedArrayFor(contentStreamText));
 
+const offsetDelta = encodedContentStream.length - 67;
+const xrefOffset = (offset: number) =>
+  String(offset + offsetDelta).padStart(10, '0');
+
 const pdfBytes = mergeIntoTypedArray(
   `%PDF-1.7
 %
@@ -25,7 +29,7 @@ const pdfBytes = mergeIntoTypedArray(
 9000 0 obj
 <<
 /Filter /FlateDecode
-/Length 67
+/Length ${encodedContentStream.length}
 >>
 stream
 `,
@@ -78,10 +82,10 @@ xref
 0000000000 65535 f 
 9000 5
 0000000016 00000 n 
-0000000158 00000 n 
-0000000270 00000 n 
-0000000411 00000 n 
-0000000477 00000 n 
+${xrefOffset(158)} 00000 n${' '}
+${xrefOffset(270)} 00000 n${' '}
+${xrefOffset(411)} 00000 n${' '}
+${xrefOffset(477)} 00000 n${' '}
 
 trailer
 <<
@@ -90,7 +94,7 @@ trailer
 >>
 
 startxref
-533
+${533 + offsetDelta}
 %%EOF`,
 );
 

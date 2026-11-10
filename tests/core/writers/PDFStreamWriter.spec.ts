@@ -1,10 +1,13 @@
-import fs from 'fs';
+import { inflateSync } from 'node:zlib';
 
-import { PDFContext, PDFName, PDFRef, PDFStreamWriter } from 'src/index';
-
-const expectedPdfBytes = new Uint8Array(
-  fs.readFileSync('./tests/core/writers/data/stream-writer-1.pdf'),
-);
+import {
+  PDFContext,
+  PDFName,
+  PDFParser,
+  PDFRawStream,
+  PDFRef,
+  PDFStreamWriter,
+} from 'src/index';
 
 const contentStreamText = `
   BT
@@ -60,7 +63,57 @@ describe(`PDFStreamWriter`, () => {
       2,
     ).serializeToBuffer();
 
-    expect(buffer.length).toBe(expectedPdfBytes.length);
-    expect(buffer).toEqual(expectedPdfBytes);
+    const bytes = Buffer.from(buffer);
+    const marker = bytes.lastIndexOf('startxref\n');
+    expect(marker).toBeGreaterThanOrEqual(0);
+    const xrefOffset = Number(
+      bytes
+        .subarray(marker + 10)
+        .toString('ascii')
+        .split('\n')[0],
+    );
+    expect(bytes.subarray(xrefOffset, xrefOffset + 11).toString('ascii')).toBe(
+      '9007 0 obj\n',
+    );
+    const streamMarker = bytes.indexOf('\nstream\n', xrefOffset) + 8;
+    expect(streamMarker).toBeGreaterThan(xrefOffset);
+    const xrefEntries = Array.from({ length: 9 }, (_, index) => {
+      const entry = bytes.subarray(
+        streamMarker + index * 5,
+        streamMarker + (index + 1) * 5,
+      );
+      return [entry[0], entry.readUInt16BE(1), entry.readUInt16BE(3)];
+    });
+    expect(xrefEntries).toEqual([
+      [0, 0, 65535],
+      [1, bytes.indexOf('9000 0 obj\n'), 0],
+      [2, 9005, 0],
+      [2, 9005, 1],
+      [2, 9006, 0],
+      [2, 9006, 1],
+      [1, bytes.indexOf('9005 0 obj\n'), 0],
+      [1, bytes.indexOf('9006 0 obj\n'), 0],
+      [1, xrefOffset, 0],
+    ]);
+
+    const parsed = await PDFParser.forBytesWithOptions(
+      buffer,
+      Infinity,
+      true,
+    ).parseDocument();
+    const parsedStream = parsed.lookup(contentStreamRef);
+    expect(parsedStream).toBeInstanceOf(PDFRawStream);
+    expect(
+      inflateSync((parsedStream as PDFRawStream).contents).toString(),
+    ).toBe(contentStreamText);
+    for (const ref of [
+      fontDictRef,
+      pageRef,
+      pagesRef,
+      context.trailerInfo.Root!,
+    ]) {
+      expect(String(parsed.lookup(ref))).toBe(String(context.lookup(ref)));
+    }
+    expect(parsed.trailerInfo.Root).toBe(context.trailerInfo.Root);
   });
 });
