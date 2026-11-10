@@ -2,6 +2,7 @@ import { Color } from 'src/api/colors';
 import PDFFont from 'src/api/PDFFont';
 import { Rotation } from 'src/api/rotations';
 import { LineCapStyle } from 'src/api/operators';
+import { Glyph } from 'src/types/fontkit';
 
 export enum BlendMode {
   Normal = 'Normal',
@@ -16,6 +17,31 @@ export enum BlendMode {
   SoftLight = 'SoftLight',
   Difference = 'Difference',
   Exclusion = 'Exclusion',
+}
+
+/** A glyph and its complete PDF text matrix in the current coordinate system. */
+export interface PDFPositionedGlyph {
+  glyph: Glyph;
+  matrix: [number, number, number, number, number, number];
+}
+
+/** Positioned glyphs together with the original source text for extraction. */
+export interface PDFPositionedGlyphCluster {
+  sourceText: string;
+  glyphs: readonly PDFPositionedGlyph[];
+}
+
+export interface PDFPageDrawGlyphClustersOptions {
+  font: PDFFont;
+  size: number;
+  color: Color;
+  /** Original logical-order text for the whole group, when different from drawing order. */
+  actualText?: string;
+}
+
+export interface PDFPageDrawGlyphsOptions
+  extends PDFPageDrawGlyphClustersOptions {
+  actualText: string;
 }
 
 export interface PDFPageDrawTextOptions {

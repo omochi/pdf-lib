@@ -660,6 +660,13 @@
     "@pdf-lib/unicode-properties" "https://github.com/omochi/unicode-properties/releases/download/v1.1.0-omochi.0/unicode-properties-v1.1.0-omochi.0.tgz"
     unicode-trie "https://github.com/omochi/unicode-trie/archive/refs/tags/v2.0.0-omochi.0.tar.gz"
 
+"@pdf-lib/fontkit@https://github.com/omochi/fontkit/releases/download/v1.7.7-omochi.2/fontkit-v1.7.7-omochi.2.tgz":
+  version "1.7.7-omochi.2"
+  resolved "https://github.com/omochi/fontkit/releases/download/v1.7.7-omochi.2/fontkit-v1.7.7-omochi.2.tgz#250b3bb5cba8ef08a587279bb2a76293310d4aba"
+  dependencies:
+    unicode-properties "https://github.com/omochi/unicode-properties/releases/download/v1.1.0-omochi.1/unicode-properties-1.1.0-omochi.1.tgz"
+    unicode-trie "https://github.com/omochi/unicode-trie/archive/refs/tags/v2.0.0-omochi.0.tar.gz"
+
 "@pdf-lib/unicode-properties@https://github.com/omochi/unicode-properties/releases/download/v1.1.0-omochi.0/unicode-properties-v1.1.0-omochi.0.tgz":
   version "0.0.1"
   resolved "https://github.com/omochi/unicode-properties/releases/download/v1.1.0-omochi.0/unicode-properties-v1.1.0-omochi.0.tgz#c17e06cd8a7477f4a1e3bd24003750c21a217a3a"
@@ -3385,6 +3392,12 @@ undici-types@~8.3.0:
   version "8.3.0"
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-8.3.0.tgz#44e9fc9f3244648cdea35e4f9bb2d681e9410809"
   integrity sha512-j375ScV60dom+YkPFIfTLcOiPxkN/buHz5GobjLhixFuANaNs3C9l4GmrWqejgXWJ7BbJcFYpTEUkS1Ge8bpZQ==
+
+"unicode-properties@https://github.com/omochi/unicode-properties/releases/download/v1.1.0-omochi.1/unicode-properties-1.1.0-omochi.1.tgz":
+  version "1.1.0-omochi.1"
+  resolved "https://github.com/omochi/unicode-properties/releases/download/v1.1.0-omochi.1/unicode-properties-1.1.0-omochi.1.tgz#cbc565ec5c275762db260620062f43d3bdd02ede"
+  dependencies:
+    unicode-trie "https://github.com/omochi/unicode-trie/archive/refs/tags/v2.0.0-omochi.0.tar.gz"
 
 "unicode-trie@https://github.com/omochi/unicode-trie/archive/refs/tags/v2.0.0-omochi.0.tar.gz":
   version "2.0.0"

@@ -172,15 +172,11 @@ export interface GlyphPosition {
  * Returned by the Font.layout method.
  */
 export interface GlyphRun {
-  /**
-   * An array of Glyph objects in the run
-   */
-  glyphs: Glyph[];
-
-  /**
-   * An array of GlyphPosition objects for each glyph in the run
-   */
-  positions: GlyphPosition[];
+  /** Shaped glyph clusters in drawing order. */
+  clusters: {
+    sourceText: string;
+    glyphs: { glyph: Glyph; position: GlyphPosition }[];
+  }[];
 
   /**
    * The script that was requested for shaping. This was either passed in or detected automatically.
@@ -197,7 +193,7 @@ export interface GlyphRun {
    * The direction requested for shaping, as passed in (either ltr or rtl).
    * If `null`, the default direction of the script is used.
    */
-  direction: 'ltr' | 'rtl' | null;
+  direction: 'ltr' | 'rtl' | 'ttb' | null;
 
   /**
    * The features requested during shaping. This is a combination of user
@@ -618,6 +614,9 @@ export interface Font {
   layout(
     str: string,
     features?: TypeFeatures | (keyof TypeFeatures)[],
+    script?: string | null,
+    language?: string | null,
+    direction?: 'ltr' | 'rtl' | 'ttb' | null,
   ): GlyphRun;
 
   // Other Methods

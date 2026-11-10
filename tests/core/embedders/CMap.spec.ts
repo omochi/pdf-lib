@@ -26,6 +26,15 @@ const allGlyphsInFontSortedById = (font: Font) => {
 };
 
 describe(`createCmap`, () => {
+  it(`omits glyphs without Unicode code points`, () => {
+    const font = fontkit.create(ubuntuFont);
+    const glyph = Object.create(font.glyphForCodePoint(65));
+    glyph.codePoints = [];
+    const cmap = createCmap([glyph], (g) => (g ? g.id : -1));
+    expect(cmap).toContain('0 beginbfchar');
+    expect(cmap).not.toContain('<>');
+  });
+
   it(`creates CMaps for embedded Ubuntu-R font files`, () => {
     const font = fontkit.create(ubuntuFont);
 

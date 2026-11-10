@@ -69,7 +69,16 @@ class CustomFontEmbedder {
    * Unicode, but embedded fonts use their own custom encodings)
    */
   encodeText(text: string): PDFHexString {
-    const { glyphs } = this.layoutText(text);
+    return this.encodeGlyphs(
+      this.layoutText(text).clusters.flatMap((cluster) =>
+        cluster.glyphs.map((item) => item.glyph),
+      ),
+    );
+  }
+
+  /** Encode glyphs obtained from this embedder's font without reshaping. */
+  encodeGlyphs(glyphs: readonly Glyph[]): PDFHexString {
+    this.validateGlyphs(glyphs);
     const hexCodes = new Array(glyphs.length);
     for (let idx = 0, len = glyphs.length; idx < len; idx++) {
       hexCodes[idx] = toHexStringOfMinLength(glyphs[idx].id, 4);
@@ -77,10 +86,20 @@ class CustomFontEmbedder {
     return PDFHexString.of(hexCodes.join(''));
   }
 
+  protected validateGlyphs(glyphs: readonly Glyph[]): void {
+    for (const glyph of glyphs) {
+      if ((glyph as any)._font !== this.font) {
+        throw new Error('Glyph belongs to a different font instance');
+      }
+    }
+  }
+
   // The advanceWidth takes into account kerning automatically, so we don't
   // have to do that manually like we do for the standard fonts.
   widthOfTextAtSize(text: string, size: number): number {
-    const { glyphs } = this.layoutText(text);
+    const glyphs = this.layoutText(text).clusters.flatMap((cluster) =>
+      cluster.glyphs.map((item) => item.glyph),
+    );
     let totalWidth = 0;
     for (let idx = 0, len = glyphs.length; idx < len; idx++) {
       totalWidth += glyphs[idx].advanceWidth * this.scale;

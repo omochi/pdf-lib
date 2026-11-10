@@ -1,11 +1,8 @@
 import Embeddable from 'src/api//Embeddable';
 import PDFDocument from 'src/api/PDFDocument';
-import {
-  CustomFontEmbedder,
-  PDFHexString,
-  PDFRef,
-} from 'src/core';
+import { CustomFontEmbedder, PDFHexString, PDFRef } from 'src/core';
 import { assertIs, assertOrUndefined } from 'src/utils';
+import { Font, Glyph } from 'src/types/fontkit';
 
 export type FontEmbedder = CustomFontEmbedder;
 
@@ -67,6 +64,17 @@ export default class PDFFont implements Embeddable {
     assertIs(text, 'text', ['string']);
     this.modified = true;
     return this.embedder.encodeText(text);
+  }
+
+  /** The fontkit font used by this PDF font and its subset. */
+  get layoutFont(): Font {
+    return this.embedder.font;
+  }
+
+  /** Register and encode already-shaped glyphs without laying text out again. */
+  encodeGlyphs(glyphs: readonly Glyph[]): PDFHexString {
+    this.modified = true;
+    return this.embedder.encodeGlyphs(glyphs);
   }
 
   /**

@@ -1,4 +1,4 @@
-import { Color, rgb } from 'src/api/colors';
+import { Color, rgb, setFillingColor } from 'src/api/colors';
 import {
   drawImage,
   drawLine,
@@ -14,6 +14,10 @@ import {
   translate,
   LineCapStyle,
   scale,
+  beginText,
+  endText,
+  setFontAndSize,
+  setTextMatrix,
 } from 'src/api/operators';
 import PDFDocument from 'src/api/PDFDocument';
 import PDFEmbeddedPage from 'src/api/PDFEmbeddedPage';
@@ -29,6 +33,10 @@ import {
   PDFPageDrawSquareOptions,
   PDFPageDrawSVGOptions,
   PDFPageDrawTextOptions,
+  PDFPageDrawGlyphsOptions,
+  PDFPageDrawGlyphClustersOptions,
+  PDFPositionedGlyph,
+  PDFPositionedGlyphCluster,
   BlendMode,
 } from 'src/api/PDFPageOptions';
 import { degrees, Rotation, toDegrees } from 'src/api/rotations';
@@ -37,6 +45,7 @@ import {
   PDFHexString,
   PDFName,
   PDFOperator,
+  PDFOperatorNames,
   PDFPageLeaf,
   PDFRef,
   PDFDict,
@@ -99,6 +108,7 @@ export default class PDFPage {
   /** The document to which this page belongs. */
   readonly doc: PDFDocument;
 
+  private readonly glyphFontKeys = new WeakMap<PDFFont, PDFName>();
   private fontKey?: PDFName;
   private font?: PDFFont;
   private fontSize = 24;
@@ -919,6 +929,80 @@ export default class PDFPage {
     assertEachIs(operator, 'operator', [[PDFOperator, 'PDFOperator']]);
     const contentStream = this.getContentStream();
     contentStream.push(...operator);
+  }
+
+  /** Draw pre-shaped clusters and preserve each cluster's input text. */
+  drawGlyphClusters(
+    clusters: readonly PDFPositionedGlyphCluster[],
+    options: PDFPageDrawGlyphClustersOptions,
+  ): void {
+    if (options.font.doc !== this.doc)
+      throw new Error('Font belongs to a different PDF document');
+    const encoded = clusters.map((cluster) =>
+      cluster.glyphs.map((item) => options.font.encodeGlyphs([item.glyph])),
+    );
+    let fontKey = this.glyphFontKeys.get(options.font);
+    if (!fontKey) {
+      fontKey = this.node.newFontDictionary(
+        options.font.name,
+        options.font.ref,
+      );
+      this.glyphFontKeys.set(options.font, fontKey);
+    }
+    const operators: PDFOperator[] = [
+      pushGraphicsState(),
+      setFillingColor(options.color),
+      beginText(),
+      setFontAndSize(fontKey, options.size),
+    ];
+    if (options.actualText !== undefined) {
+      const marked = this.doc.context.obj({
+        ActualText: PDFHexString.fromText(options.actualText),
+      });
+      operators.push(
+        PDFOperator.of(PDFOperatorNames.BeginMarkedContentSequence, [
+          PDFName.of('Span'),
+          marked,
+        ]),
+      );
+    }
+    for (let c = 0; c < clusters.length; c++) {
+      const cluster = clusters[c];
+      if (options.actualText === undefined) {
+        const marked = this.doc.context.obj({
+          ActualText: PDFHexString.fromText(cluster.sourceText),
+        });
+        operators.push(
+          PDFOperator.of(PDFOperatorNames.BeginMarkedContentSequence, [
+            PDFName.of('Span'),
+            marked,
+          ]),
+        );
+      }
+      for (let i = 0; i < cluster.glyphs.length; i++) {
+        operators.push(
+          setTextMatrix(...cluster.glyphs[i].matrix),
+          PDFOperator.of(PDFOperatorNames.ShowText, [encoded[c][i]]),
+        );
+      }
+      if (options.actualText === undefined)
+        operators.push(PDFOperator.of(PDFOperatorNames.EndMarkedContent));
+    }
+    if (options.actualText !== undefined)
+      operators.push(PDFOperator.of(PDFOperatorNames.EndMarkedContent));
+    operators.push(endText(), popGraphicsState());
+    this.pushOperators(...operators);
+  }
+
+  /** Draw pre-shaped, positioned glyphs and preserve their source text. */
+  drawGlyphs(
+    glyphs: readonly PDFPositionedGlyph[],
+    options: PDFPageDrawGlyphsOptions,
+  ): void {
+    this.drawGlyphClusters(
+      [{ sourceText: options.actualText, glyphs }],
+      options,
+    );
   }
 
   /**
